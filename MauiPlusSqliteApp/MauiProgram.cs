@@ -23,7 +23,12 @@ namespace MauiPlusSqliteApp
 #endif
 
             var app = builder.Build();
-            CreateDb(app);
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<TodoRepository>();
+                context.Database.EnsureCreated();
+            }
 
             return app;
         }
