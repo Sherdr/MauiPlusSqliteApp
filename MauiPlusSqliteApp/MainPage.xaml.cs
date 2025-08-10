@@ -1,20 +1,18 @@
 ﻿using MauiPlusSqliteApp.Data;
 using MauiPlusSqliteApp.Models;
+using MauiPlusSqliteApp.Services;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.ObjectModel;
-using System.Threading.Tasks;
 
 namespace MauiPlusSqliteApp
 {
     public partial class MainPage : ContentPage
     {
-        readonly TodoRepository dbContext;
 
         public ObservableCollection<Todo> TodoList { get; set; }
 
         public MainPage(TodoRepository dbContext)
         {
-            this.dbContext = dbContext;
             InitializeComponent();
             TodoList = new ObservableCollection<Todo>();
             BindingContext = this;
@@ -25,8 +23,8 @@ namespace MauiPlusSqliteApp
         {
             try
             {
-                await dbContext.Database.EnsureCreatedAsync();
-                var todos = await dbContext.Todolist.ToListAsync();
+                var todos = OperationsTodo.Read();
+                TodoList.Clear();
                 foreach(var todo in todos)
                 {
                     TodoList.Add(todo);
@@ -48,10 +46,9 @@ namespace MauiPlusSqliteApp
             try
             {
                 var todo = new Todo { Title = TitleEntry.Text };
-                TodoList.Add(todo);
+                OperationsTodo.Create(todo);
+                LoadTodoList();
                 TitleEntry.Text = string.Empty;
-                dbContext.Todolist.Add(todo);
-                await dbContext.SaveChangesAsync();
                 await DisplayAlert("Success!", "Todo added.", "OK");
             }
             catch (Exception ex)
@@ -73,9 +70,8 @@ namespace MauiPlusSqliteApp
                 }
                 try
                 {
-                    dbContext.Todolist.Remove(todoDelete);
-                    TodoList.Remove(todoDelete);
-                    await dbContext.SaveChangesAsync();
+                    OperationsTodo.Delete(todoDelete);
+                    LoadTodoList();
                     await DisplayAlert("Success!", "Todo deleted.", "OK");
                 }
                 catch (Exception ex)
@@ -99,13 +95,8 @@ namespace MauiPlusSqliteApp
                 try
                 {
                     todoEdit.Title = newTitle;
-                    dbContext.Todolist.Update(todoEdit);
-                    await dbContext.SaveChangesAsync();
-                    var index = TodoList.IndexOf(todoEdit);
-                    if(index != -1)
-                    {
-                        TodoList[index] = todoEdit;
-                    }
+                    OperationsTodo.Update(todoEdit);
+                    LoadTodoList();
                     await DisplayAlert("Success!", "Todo updated.", "OK");
                 }
                 catch(Exception ex)

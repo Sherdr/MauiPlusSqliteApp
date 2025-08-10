@@ -7,6 +7,13 @@ namespace MauiPlusSqliteApp.Data
     {
         public DbSet<Todo> Todolist { get; set; }
 
-        public TodoRepository(DbContextOptions<TodoRepository> options) : base(options) { }
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+                var pathDb = Path.Combine(FileSystem.AppDataDirectory, "Todo.db");
+                optionsBuilder.UseSqlite($"Filename={pathDb}");
+            }
+        }
     }
 }

@@ -1,6 +1,4 @@
 ﻿using MauiPlusSqliteApp.Data;
-using MauiPlusSqliteApp.Models;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace MauiPlusSqliteApp
@@ -18,33 +16,31 @@ namespace MauiPlusSqliteApp
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
 
-            //for DbContext
-            builder.Services.AddDbContext<TodoRepository>(options =>
-            {
-                var pathDb = Path.Combine(FileSystem.AppDataDirectory, "Todo.db");
-                options.UseSqlite($"Data Source={pathDb}");
-            });
+            builder.Services.AddDbContext<TodoRepository>();
 
 #if DEBUG
-    		builder.Logging.AddDebug();
+            builder.Logging.AddDebug();
 #endif
 
-            //for init DbContext
             var app = builder.Build();
-            using(var scope = app.Services.CreateScope())
-            {
-                var context = scope.ServiceProvider.GetRequiredService<TodoRepository>();
-                context.Database.EnsureCreated();
-                if(!context.Todolist.Any())
-                {
-                    context.Todolist.AddRange(
-                        new Todo { Title = "StandUp"},
-                        new Todo { Title = "Relax" } );
-                    context.SaveChanges();
-                }
-            }
+            CreateDb(app);
 
             return app;
+        }
+
+        static void CreateDb(MauiApp app)
+        {
+            using var scope = app.Services.CreateScope();
+            var services = scope.ServiceProvider;
+            try
+            {
+                var context = services.GetRequiredService<TodoRepository>();
+                DbInitialize.Initialize(context);
+            }
+            catch(Exception ex)
+            {
+                //TODO: logger.LogError(ex, "Failed to create the Db")
+            }
         }
     }
 }
