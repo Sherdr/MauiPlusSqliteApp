@@ -1,0 +1,65 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MauiPlusSqliteApp.MainPage">
+
+    <ScrollView>
+        <VerticalStackLayout
+            Padding="30,0"
+            Spacing="25"
+            VerticalOptions="Center">
+
+            <Label
+                Text="Todo list"
+                FontSize="32"
+                HorizontalOptions="Center" />
+
+            <VerticalStackLayout
+                Spacing="10">
+                
+                <Entry
+                    x:Name="TitleEntry"
+                    Placeholder="Enter todo's title:" />
+
+                <Button
+                    Text="Add todo"
+                    Clicked="OnAddTodoClicked" />
+            </VerticalStackLayout>
+
+            <CollectionView
+                ItemsSource="{Binding TodoList}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid
+                            Padding="10"
+                            ColumnDefinitions="*, Auto, Auto">
+
+                            <Label 
+                                Text="{Binding Title}"
+                                VerticalOptions="Center" />
+                            
+                            <Button
+                                Grid.Column="1"
+                                Text="Edit"
+                                Background="Orange"
+                                TextColor="White"
+                                CommandParameter="{Binding .}"
+                                Clicked="OnEditTodoClicked" />
+
+                            <Button
+                                Grid.Column="2"
+                                Text="Delete"
+                                Background="Red"
+                                TextColor="White"
+                                Margin="5"
+                                CommandParameter="{Binding .}"
+                                Clicked="OnDeleteTodoClicked" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
